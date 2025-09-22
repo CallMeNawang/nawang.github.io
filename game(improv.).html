@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Echo Maze — Neon Escape</title>
+<style>
+html,body{margin:0;padding:0;height:100%;background:#05050a;overflow:hidden;font-family:'Inter',sans-serif;color:#eaf0ff;display:flex;justify-content:center;align-items:center;}
+canvas{display:block;border-radius:16px;box-shadow:0 0 50px rgba(0,200,255,0.25),0 0 120px rgba(0,200,255,0.1) inset;background:radial-gradient(circle at 50% 50%,#000010,#000);}
+#overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#cfeaff;padding:4vh 6vw;border-radius:20px;background:rgba(0,0,20,0.85);box-shadow:0 0 40px rgba(0,200,255,0.5);backdrop-filter:blur(6px);max-width:90%;}
+#overlay h1{font-size:6vw;margin:0 0 2vh;text-shadow:0 0 25px rgba(0,200,255,0.8);animation: neonPulse 1.2s infinite;}
+#overlay p{font-size:2vw;opacity:0.85;margin-bottom:2vh;line-height:1.4;}
+#overlay button{margin-top:2vh;padding:1.2vh 2vw;border:none;border-radius:12px;background:linear-gradient(90deg,#00c8ff,#00ffa6);color:#000;font-weight:bold;cursor:pointer;box-shadow:0 0 20px rgba(0,255,200,0.5);transition:transform 0.2s,box-shadow 0.2s;font-size:1.5vw;}
+#overlay button:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(0,255,200,0.7);}
+#hud{position:absolute;top:1.5vh;left:50%;transform:translateX(-50%);font-size:2vw;color:#0ff;text-shadow:0 0 15px rgba(0,255,200,0.9);background:rgba(0,0,20,0.7);padding:0.6vh 1.2vw;border-radius:1vw;}
+#musicControl{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:#0ff;font-size:16px;text-align:center;}
+@keyframes neonPulse{0%,100%{text-shadow:0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff;}50%{text-shadow:0 0 20px #0ff,0 0 30px #0ff,0 0 40px #0ff;}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="overlay">
+<h1>Echo Maze</h1>
+<p>Use <b>Arrow Keys / WASD</b> to move.<br>Tap / Click or press <b>SPACE</b> to send a sonar pulse.<br>Find the glowing exit!</p>
+<button id="startBtn">Start Game</button>
+</div>
+<div id="hud"></div>
+<div id="musicControl">
+Music Volume: <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+</div>
+
+<!-- Sounds -->
+<audio id="pingSound" src="ping.mp3" preload="auto"></audio>
+<audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+<audio id="levelSound" src="levelup.mp3" preload="auto"></audio>
+<audio id="bgMusic" src="neon_loop.mp3" preload="auto" loop></audio>
+
+<script>
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+let W=window.innerWidth*0.95, H=window.innerHeight*0.85;
+canvas.width=W; canvas.height=H;
+
+let running=false, keys={}, player, maze, exitPulse=0, sonar=[], level=1, score=0, particles=[], echoes=5, lives=3;
+let shakeOffset={x:0,y:0}, shakeIntensity=0;
+
+const bgMusic=document.getElementById('bgMusic');
+const volumeSlider=document.getElementById('volumeSlider');
+
+function startMusic(){
+  bgMusic.volume=volumeSlider.value; bgMusic.play().catch(()=>{});
+  window.removeEventListener('keydown',startMusic); window.removeEventListener('touchstart',startMusic);
+}
+window.addEventListener('keydown',startMusic);
+window.addEventListener('touchstart',startMusic);
+volumeSlider.addEventListener('input',()=>{ bgMusic.volume=volumeSlider.value; });
+
+function resizeCanvas(){ W=window.innerWidth*0.95; H=window.innerHeight*0.85; canvas.width=W; canvas.height=H; if(running) reset(); }
+window.addEventListener('resize',resizeCanvas);
+
+function reset(){
+  let cols=16+(level-1)*2, rows=12+(level-1);
+  let cellSize=Math.min(W/cols,H/rows), wallChance=Math.min(0.2+(level-1)*0.05,0.45);
+  player={x:cellSize/2,y:cellSize/2,r:Math.min(W,H)/60,speed:160+level*5};
+  maze=generateMaze(cols,rows,cellSize,wallChance);
+  sonar=[]; exitPulse=0; particles=[]; echoes=5+Math.floor(level/2); lives=3;
+  shakeOffset={x:0,y:0}; shakeIntensity=0;
+  updateHUD();
+}
+
+function generateMaze(cols,rows,cellSize,wallChance){
+  let grid=[]; for(let r=0;r<rows;r++){ for(let c=0;c<cols;c++){ if(Math.random()<wallChance) grid.push({x:c*cellSize,y:r*cellSize,w:cellSize,h:cellSize}); } } return grid;
+}
+
+function playSound(id){ const s=document.getElementById(id); if(s){ s.currentTime=0; s.play().catch(()=>{}); } }
+
+function ping(){ if(echoes>0){ sonar.push({x:player.x,y:player.y,r:0,max:Math.min(W,H)/3}); echoes--; playSound('pingSound'); for(let i=0;i<8;i++) particles.push({x:player.x,y:player.y,r:Math.random()*2+1,vx:(Math.random()-0.5)*50,vy:(Math.random()-0.5)*50,life:0.5}); } }
+
+function update(dt){
+  let dx=(keys['ArrowRight']||keys['d']?1:0)-(keys['ArrowLeft']||keys['a']?1:0);
+  let dy=(keys['ArrowDown']||keys['s']?1:0)-(keys['ArrowUp']||keys['w']?1:0);
+  let len=Math.hypot(dx,dy); if(len>0){dx/=len; dy/=len;}
+  player.x+=dx*player.speed*dt; player.y+=dy*player.speed*dt;
+
+  // restrict player inside canvas
+  player.x=Math.max(player.r,Math.min(W-player.r,player.x));
+  player.y=Math.max(player.r,Math.min(H-player.r,player.y));
+
+  // wall collisions
+  for(const wall of maze){
+    if(player.x>wall.x && player.x<wall.x+wall.w && player.y>wall.y && player.y<wall.y+wall.h){
+      lives--; shakeIntensity=5; playSound('hitSound');
+      if(lives<=0){ running=false; showOverlay('Game Over','Score: '+score+'<br><button id="restartBtn">Restart</button>',()=>{level=1; score=0; reset(); running=true; document.getElementById('overlay').style.display='none'; last=performance.now(); requestAnimationFrame(loop);}); }
+      if(dx>0) player.x=wall.x; if(dx<0) player.x=wall.x+wall.w;
+      if(dy>0) player.y=wall.y; if(dy<0) player.y=wall.y+wall.h;
+    }
+  }
+
+  sonar.forEach(s=>s.r+=200*dt); sonar=sonar.filter(s=>s.r<s.max);
+  exitPulse+=dt;
+
+  particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt; });
+  particles=particles.filter(p=>p.life>0);
+
+  shakeOffset.x=(Math.random()-0.5)*shakeIntensity; shakeOffset.y=(Math.random()-0.5)*shakeIntensity;
+  shakeIntensity*=0.85;
+}
+
+function draw(){
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(shakeOffset.x,shakeOffset.y);
+
+  // sonar
+  for(const s of sonar){ const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r); g.addColorStop(0,'rgba(0,255,200,0.7)'); g.addColorStop(0.5,'rgba(0,255,200,0.2)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='rgba(0,255,255,0.3)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.stroke(); }
+
+  // exit
+  const ex={x:W-80,y:H-80}; let pulse=30+Math.sin(exitPulse*6)*12; const eg=ctx.createRadialGradient(ex.x,ex.y,0,ex.x,ex.y,pulse); eg.addColorStop(0,'rgba(0,255,180,1)'); eg.addColorStop(0.5,'rgba(0,200,255,0.25)'); eg.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(ex.x,ex.y,pulse,0,Math.PI*2); ctx.fill();
+
+  // walls
+  ctx.save(); ctx.fillStyle='rgba(120,180,255,0.25)'; for(const wall of maze){ for(const s of sonar){ const cx=wall.x+wall.w/2, cy=wall.y+wall.h/2; if(Math.hypot(cx-s.x,cy-s.y)<s.r+80){ ctx.shadowColor='rgba(0,200,255,0.8)'; ctx.shadowBlur=12; ctx.fillRect(wall.x,wall.y,wall.w,wall.h); } } } ctx.restore();
+
+  // player
+  ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  const pg=ctx.createRadialGradient(player.x,player.y,2,player.x,player.y,30); pg.addColorStop(0,'#0ff'); pg.addColorStop(1,'transparent'); ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(player.x,player.y,30,0,Math.PI*2); ctx.fill();
+
+  // particles
+  particles.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(0,255,200,${p.life*0.7})`; ctx.fill(); });
+
+  ctx.restore();
+
+  // exit check
+  if(Math.hypot(player.x-ex.x,player.y-ex.y)<25){ running=false; level++; score+=Math.floor(Math.random()*100)+50; playSound('levelSound'); showOverlay('Level '+(level-1)+' Complete!','Score: '+score+'<br>Next Level: '+level+'<br><button id="nextLevelBtn">Next Level</button>',()=>{ reset(); running=true; document.getElementById('overlay').style.display='none'; last=performance.now(); requestAnimationFrame(loop);}); }
+}
+
+function updateHUD(){ document.getElementById('hud').innerHTML='Level: '+level+' | Score: '+score+' | Echoes: '+echoes+' | Lives: '+lives; }
+
+let last=0;
+function loop(ts){ if(!running) return; let dt=(ts-last)/1000; last=ts; update(dt); draw(); updateHUD(); requestAnimationFrame(loop); }
+
+function showOverlay(title,text,callback){ const overlay=document.getElementById('overlay'); overlay.style.display='block'; overlay.innerHTML=`<h1>${title}</h1><p>${text}</p>`; if(callback){ setTimeout(()=>{document.querySelector('#overlay button').onclick=callback;},50); } }
+
+window.addEventListener('keydown',e=>{ keys[e.key]=true; if(e.key===' ') ping(); });
+window.addEventListener('keyup',e=>{ keys[e.key]=false; });
+
+// touch controls
+let touchStart=null;
+canvas.addEventListener('touchstart',e=>{ e.preventDefault(); if(!running) return; touchStart=e.touches[0]; });
+canvas.addEventListener('touchmove',e=>{ e.preventDefault(); if(!touchStart) return; const touch=e.touches[0]; const dx=touch.clientX-touchStart.clientX; const dy=touch.clientY-touchStart.clientY; keys['ArrowRight']=dx>10; keys['ArrowLeft']=dx<-10; keys['ArrowDown']=dy>10; keys['ArrowUp']=dy<-10; });
+canvas.addEventListener('touchend',e=>{ keys['ArrowRight']=keys['ArrowLeft']=keys['ArrowDown']=keys['ArrowUp']=false; ping(); touchStart=null; });
+
+document.getElementById('startBtn').onclick=()=>{ reset(); running=true; document.getElementById('overlay').style.display='none'; last=performance.now(); requestAnimationFrame(loop); };
+
+reset(); draw();
+</script>
+</body>
+</html>
