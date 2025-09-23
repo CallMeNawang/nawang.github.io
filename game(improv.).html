@@ -17,10 +17,10 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
 #hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.45);padding:6px 12px;border-radius:10px;font-size:15px;color:var(--cyan);z-index:4}
 #controls{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:4}
 .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(0,255,255,0.06);color:var(--cyan);padding:8px 10px;border-radius:8px;cursor:pointer}
-#joystickBase,#joystickKnob{position:absolute;left:14px;bottom:14px;display:none}
-#joystickBase{width:120px;height:120px;border-radius:50%;background:rgba(0,255,255,0.03);border:1px solid rgba(0,255,255,0.06)}
-#joystickKnob{width:60px;height:60px;border-radius:50%;background:rgba(0,255,255,0.15);transform:translate(30px,30px)}
 .small{font-size:13px;padding:6px 8px}
+
+#mobileControls{position:absolute;left:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;z-index:4;}
+#mobileControls div{display:flex;justify-content:center;gap:6px;}
 
 @keyframes fadeIn { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
 </style>
@@ -32,7 +32,7 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
   <div id="panel">
     <h1>Echo Maze — Neon Escape</h1>
     <p><b>PC Controls:</b><br>• Move: W/A/S/D or Arrow keys<br>• Ping sonar: Space or Click</p>
-    <p><b>Phone Controls:</b><br>• Joystick bottom-left<br>• Tap screen to ping</p>
+    <p><b>Phone Controls:</b><br>• Use buttons below to move<br>• Tap Ping button</p>
     <p><b>Power-Ups:</b><br>
       • Cyan: +3 Echoes<br>• Yellow: Shield<br>• Green: +120 Score</p>
     <button id="startBtn">Start Game</button>
@@ -48,7 +48,16 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
   </div>
 </div>
 
-<div id="joystickBase"><div id="joystickKnob"></div></div>
+<!-- MOBILE BUTTON CONTROLS -->
+<div id="mobileControls">
+  <div><button class="btn small" id="upBtn">↑</button></div>
+  <div>
+    <button class="btn small" id="leftBtn">←</button>
+    <button class="btn small" id="downBtn">↓</button>
+    <button class="btn small" id="rightBtn">→</button>
+  </div>
+  <div><button class="btn small" id="pingBtn">Ping</button></div>
+</div>
 
 <audio id="bg" loop preload="auto">
   <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
@@ -164,7 +173,7 @@ function update(dt){
     level++; score+=200; echoes=10;
     levelTransition=true;
     levelUp.play().catch(()=>{});
-    setTimeout(()=>{ showOverlay('Level Completed'); },300); // show overlay after short delay
+    setTimeout(()=>{ showOverlay('Level Completed'); },300);
   }
 
   if(lives<=0&&running){ running=false; showOverlay('Game Over'); }
@@ -194,14 +203,32 @@ function loop(ts){ if(!running) return; if(!last) last=ts; const dt=Math.min(0.0
 window.addEventListener('keydown',e=>{ keys[e.key]=true; if(e.key===' ') ping(); });
 window.addEventListener('keyup',e=>{ keys[e.key]=false; });
 canvas.addEventListener('click',()=>{ if(running) ping(); });
-window.addEventListener('deviceorientation',e=>{ tiltX=(e.gamma||0)/30; tiltY=(e.beta||0)/60; });
 
-/* --- JOYSTICK --- */
-const jb=document.getElementById('joystickBase'), jk=document.getElementById('joystickKnob'); jb.style.display='block'; jk.style.display='block';
-let joystickActive=false;
-jb.addEventListener('pointerdown',()=>{ joystickActive=true; });
-window.addEventListener('pointerup',()=>{ joystickActive=false; tiltX=0; tiltY=0; jk.style.transform='translate(30px,30px)'; });
-window.addEventListener('pointermove',e=>{ if(joystickActive){ const rect=jb.getBoundingClientRect(); let dx=e.clientX-(rect.left+rect.width/2); let dy=e.clientY-(rect.top+rect.height/2); const dist=Math.min(50,Math.hypot(dx,dy)); const ang=Math.atan2(dy,dx); dx=Math.cos(ang)*dist; dy=Math.sin(ang)*dist; jk.style.transform=`translate(${dx+30}px,${dy+30}px)`; tiltX=dx/50; tiltY=dy/50; } });
+/* --- MOBILE BUTTONS --- */
+tiltX = 0; tiltY = 0;
+const upBtn = document.getElementById('upBtn');
+const downBtn = document.getElementById('downBtn');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const pingBtn = document.getElementById('pingBtn');
+
+function updateTilt(){
+  tiltX = 0;
+  tiltY = 0;
+  if(upBtn.pressed) tiltY -= 1;
+  if(downBtn.pressed) tiltY += 1;
+  if(leftBtn.pressed) tiltX -= 1;
+  if(rightBtn.pressed) tiltX += 1;
+}
+
+[upBtn, downBtn, leftBtn, rightBtn].forEach(btn=>{
+  btn.pressed = false;
+  btn.addEventListener('pointerdown',()=>{ btn.pressed=true; updateTilt(); });
+  btn.addEventListener('pointerup',()=>{ btn.pressed=false; updateTilt(); });
+  btn.addEventListener('pointerleave',()=>{ btn.pressed=false; updateTilt(); });
+});
+
+pingBtn.addEventListener('pointerdown',()=>{ ping(); });
 
 /* --- START --- */
 document.getElementById('startBtn').onclick=()=>{ overlay.style.display='none'; resetAll(true); running=true; if(!bg.paused) bg.play().catch(()=>{}); requestAnimationFrame(loop); }
