@@ -18,10 +18,8 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
 #controls{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:4}
 .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(0,255,255,0.06);color:var(--cyan);padding:8px 10px;border-radius:8px;cursor:pointer}
 .small{font-size:13px;padding:6px 8px}
-
 #mobileControls{position:absolute;left:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;z-index:4;}
 #mobileControls div{display:flex;justify-content:center;gap:6px;}
-
 @keyframes fadeIn { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
 </style>
 </head>
@@ -48,7 +46,6 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
   </div>
 </div>
 
-<!-- MOBILE BUTTON CONTROLS -->
 <div id="mobileControls">
   <div><button class="btn small" id="upBtn">↑</button></div>
   <div>
@@ -69,15 +66,20 @@ canvas{display:block;border-radius:14px;box-shadow:0 10px 60px rgba(0,0,0,0.6);m
 <script>
 /* --- GLOBALS --- */
 const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
-function resize(){ canvas.width=Math.max(900,Math.min(window.innerWidth-40,1200)); canvas.height=Math.max(600,Math.min(window.innerHeight-40,800));}
-resize(); window.addEventListener('resize',resize);
+function resize(){ 
+    canvas.width=Math.max(900,Math.min(window.innerWidth-40,1200)); 
+    canvas.height=Math.max(600,Math.min(window.innerHeight-40,800));
+}
+resize(); 
+window.addEventListener('resize',resize);
 
 let running=false, keys={}, tiltX=0, tiltY=0, maze=[], powerUps=[], sonar=[];
 let player={x:50,y:50,r:10,speed:170,shield:false,hitCD:0}, echoes=10, lives=3, level=1, score=0, exitPulse=0;
 let levelTransition=false;
 
 const hud=document.getElementById('hud'), overlay=document.getElementById('overlay');
-const bg=document.getElementById('bg'), levelUp=document.getElementById('levelUp'); bg.volume=0.12; levelUp.volume=0.3;
+const bg=document.getElementById('bg'), levelUp=document.getElementById('levelUp'); 
+bg.volume=0.12; levelUp.volume=0.3;
 
 /* --- AUDIO CONTROLS --- */
 document.getElementById('toggleMusic').onclick=()=>{ if(bg.paused) bg.play(); else bg.pause(); };
@@ -121,7 +123,8 @@ function ping(){ if(echoes<=0) return; sonar.push({x:player.x,y:player.y,r:20,ma
 
 /* --- RESET --- */
 function resetAll(levelReset=false){
-  generateMaze(); spawnPowerUps(); sonar=[]; if(levelReset){ echoes=10; lives=3; score=0; level=1;}
+  generateMaze(); spawnPowerUps(); sonar=[]; 
+  if(levelReset){ echoes=10; lives=3; score=0; level=1;}
   player.shield=false; exitPulse=0; last=0; levelTransition=false;
 }
 
@@ -163,7 +166,14 @@ function update(dt){
     }
   }
 
-  for(const p of powerUps){ if(p.active&&Math.hypot(player.x-p.x,player.y-p.y)<player.r+p.r+2){ p.active=false; if(p.type==='echo') echoes=Math.min(echoes+3,9); if(p.type==='shield') player.shield=true; if(p.type==='score') score+=120; } }
+  for(const p of powerUps){ 
+    if(p.active&&Math.hypot(player.x-p.x,player.y-p.y)<player.r+p.r+2){ 
+      p.active=false; 
+      if(p.type==='echo') echoes=Math.min(echoes+3,9); 
+      if(p.type==='shield') player.shield=true; 
+      if(p.type==='score') score+=120; 
+    } 
+  }
 
   for(const s of sonar){ s.r+=200*dt; }
   for(let i=sonar.length-1;i>=0;i--) if(sonar[i].r>sonar[i].max) sonar.splice(i,1);
@@ -184,24 +194,59 @@ function draw(){
   ctx.fillStyle='#05050a'; ctx.fillRect(0,0,canvas.width,canvas.height);
 
   const ex={x:canvas.width-80,y:canvas.height-80}; const pulse=28+Math.sin(exitPulse*5)*12;
-  const eg=ctx.createRadialGradient(ex.x,ex.y,0,ex.x,ex.y,pulse); eg.addColorStop(0,'rgba(0,255,180,1)'); eg.addColorStop(0.4,'rgba(0,255,180,0.5)'); eg.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(ex.x,ex.y,pulse,0,Math.PI*2); ctx.fill();
+  const eg=ctx.createRadialGradient(ex.x,ex.y,0,ex.x,ex.y,pulse); 
+  eg.addColorStop(0,'rgba(0,255,180,1)'); 
+  eg.addColorStop(0.4,'rgba(0,255,180,0.5)'); 
+  eg.addColorStop(1,'rgba(0,0,0,0)'); 
+  ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(ex.x,ex.y,pulse,0,Math.PI*2); ctx.fill();
 
-  for(const s of sonar){ const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r); g.addColorStop(0,'rgba(0,255,255,0.45)'); g.addColorStop(0.5,'rgba(0,200,255,0.2)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); }
+  for(const s of sonar){ 
+    const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r); 
+    g.addColorStop(0,'rgba(0,255,255,0.45)'); 
+    g.addColorStop(0.5,'rgba(0,200,255,0.2)'); 
+    g.addColorStop(1,'rgba(0,0,0,0)'); 
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); 
+  }
 
-  for(const w of maze){ let visible=false; for(const s of sonar){ const cx=w.x+w.w/2,cy=w.y+w.h/2; if(Math.hypot(cx-s.x,cy-s.y)<s.r+50){ visible=true; break; } } if(w.glow>0) visible=true; if(visible){ ctx.fillStyle='rgba(0,255,255,0.45)'; ctx.fillRect(w.x,w.y,w.w,w.h); } }
+  for(const w of maze){ 
+    let visible=false; 
+    for(const s of sonar){ 
+      const cx=w.x+w.w/2,cy=w.y+w.h/2; 
+      if(Math.hypot(cx-s.x,cy-s.y)<s.r+50){ visible=true; break; } 
+    } 
+    if(w.glow>0) visible=true; 
+    if(visible){ ctx.fillStyle='rgba(0,255,255,0.45)'; ctx.fillRect(w.x,w.y,w.w,w.h); } 
+  }
 
-  for(const p of powerUps){ if(!p.active) continue; const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r+12); if(p.type==='echo'){g.addColorStop(0,'rgba(0,255,255,0.5)'); g.addColorStop(1,'rgba(0,255,255,0)');} else if(p.type==='shield'){g.addColorStop(0,'rgba(255,255,0,0.45)'); g.addColorStop(1,'rgba(255,255,0,0)');} else{g.addColorStop(0,'rgba(0,255,120,0.45)'); g.addColorStop(1,'rgba(0,255,120,0)');} ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+  for(const p of powerUps){ 
+    if(!p.active) continue; 
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r+12); 
+    if(p.type==='echo'){g.addColorStop(0,'rgba(0,255,255,0.5)'); g.addColorStop(1,'rgba(0,255,255,0)');} 
+    else if(p.type==='shield'){g.addColorStop(0,'rgba(255,255,0,0.45)'); g.addColorStop(1,'rgba(255,255,0,0)');} 
+    else{g.addColorStop(0,'rgba(0,255,120,0.45)'); g.addColorStop(1,'rgba(0,255,120,0)');} 
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); 
+  }
 
-  ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,Math.PI*2); ctx.fillStyle=player.shield?'#ffd042':'#ffffff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,Math.PI*2); 
+  ctx.fillStyle=player.shield?'#ffd042':'#ffffff'; ctx.fill();
   hud.innerHTML=`Level: ${level} • Score: ${score} • Echoes: ${echoes} • Lives: ${lives}`;
 }
 
 /* --- LOOP --- */
-function loop(ts){ if(!running) return; if(!last) last=ts; const dt=Math.min(0.05,(ts-last)/1000); last=ts; update(dt); draw(); requestAnimationFrame(loop); }
+function loop(ts){ 
+    if(!running) return; 
+    if(!last) last=ts; 
+    const dt=Math.min(0.05,(ts-last)/1000); last=ts; 
+    update(dt); draw(); 
+    requestAnimationFrame(loop); 
+}
 
 /* --- INPUT --- */
-window.addEventListener('keydown',e=>{ keys[e.key]=true; if(e.key===' ') ping(); });
-window.addEventListener('keyup',e=>{ keys[e.key]=false; });
+window.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    if (e.key === ' ') { e.preventDefault(); ping(); }
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; if(e.key===' ') e.preventDefault(); });
 canvas.addEventListener('click',()=>{ if(running) ping(); });
 
 /* --- MOBILE BUTTONS --- */
@@ -231,7 +276,13 @@ function updateTilt(){
 pingBtn.addEventListener('pointerdown',()=>{ ping(); });
 
 /* --- START --- */
-document.getElementById('startBtn').onclick=()=>{ overlay.style.display='none'; resetAll(true); running=true; if(!bg.paused) bg.play().catch(()=>{}); requestAnimationFrame(loop); }
+document.getElementById('startBtn').onclick=()=>{ 
+    overlay.style.display='none'; 
+    resetAll(true); 
+    running=true; 
+    if(bg.paused) bg.play().catch(()=>{}); 
+    requestAnimationFrame(loop); 
+}
 </script>
 </body>
 </html>
