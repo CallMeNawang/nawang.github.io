@@ -257,12 +257,7 @@
       padding: 0 14px;
       backface-visibility: hidden;
     }
-    .card-front {
-      background: var(--card-front);
-      color: #c3deff;
-      z-index: 2;
-      border-radius: inherit;
-    }
+    .card-front { background: var(--card-front); color: #c3deff; z-index: 2; border-radius: inherit; }
     .card-back {
       background: var(--card-back);
       color: #f1f6fb;
@@ -287,10 +282,7 @@
       color: #ffc107;
       text-shadow: 0 2px 8px #000c;
     }
-    @keyframes trophyBounce {
-      from { transform: scale(1);}
-      to { transform: scale(1.12);}
-    }
+    @keyframes trophyBounce { from { transform: scale(1);} to { transform: scale(1.12);} }
 
     .contact-list {
       display: flex;
@@ -350,10 +342,8 @@
     .funfact span:last-child {
       animation: bounceEmoji 1.2s infinite alternate;
     }
-    @keyframes bounceEmoji {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-6px); }
-    }
+    @keyframes bounceEmoji { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+
     footer {
       margin: 50px 0 24px 0;
       text-align: center;
@@ -389,7 +379,7 @@
 
   <section class="hero">
     <div class="photo-frame">
-     <img class="avatar" src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Faceless Profile Avatar">
+      <img class="avatar" src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Faceless Profile Avatar">
     </div>
     <div class="intro">
       <h1>Adventurer, Chef & Student</h1>
@@ -399,168 +389,62 @@
         Sports lover, traveler, and professional chef.<br>
         Trekking, adventure, and chess are my passions.<br>
         Former coach for national-level players in Nepal.<br>
-        Always seeking new challenges in life, kitchen, and mind!
+        Exploring coding, web development, and game design.
       </div>
-      <div class="chess">
-        Chess.com ELO: <span id="chessRating">1900</span> (Current ranking: 1900 ELO, Goal: 2200+)
-      </div>
+      <div class="chess">Chess enthusiast & hobbyist</div>
     </div>
   </section>
 
   <div class="main">
+    <!-- INTERESTS -->
     <div class="topic-title">My Interests</div>
     <div class="card-list" id="interests-list">
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">🏃‍♂️ Sports & Coaching</div>
-          <div class="card-back">
-            <span class="trophy">🏆</span>
-            National Sports Coach Award<br>2022, Nepal
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">🌏 Travelling & Adventure</div>
-          <div class="card-back">
-            <span class="trophy">🚁</span>
-            Explored 7+ countries<br>Still collecting stamps!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">🥾 Trekking & Nature</div>
-          <div class="card-back">
-            <span class="trophy">🥇</span>
-            Completed Everest Base Camp trek<br>Survived without Wi-Fi!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">🍳 Cooking (Chef)</div>
-          <div class="card-back">
-            <span class="trophy">🧯</span>
-            Managed to cook without triggering the smoke alarm<br>...at least once!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">♟️ Chess (Active player)</div>
-          <div class="card-back">
-            <span class="trophy">♔</span>
-            Beat 3 grandpas at chess<br>and lost to a 9-year-old!
-          </div>
-        </div>
-      </div>
+      <div class="card"><div class="card-inner"><div class="card-front">🏃‍♂️ Sports & Coaching</div><div class="card-back"><span class="trophy">🏆</span>National Sports Coach Award<br>2022, Nepal</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">🌏 Travelling & Adventure</div><div class="card-back"><span class="trophy">🚁</span>Explored 7+ countries<br>Still collecting stamps!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">🥾 Trekking & Nature</div><div class="card-back"><span class="trophy">🥇</span>Completed Everest Base Camp trek<br>Survived without Wi-Fi!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">🍳 Cooking (Chef)</div><div class="card-back"><span class="trophy">🧯</span>Managed to cook without triggering the smoke alarm<br>...at least once!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">♟️ Chess (Active player)</div><div class="card-back"><span class="trophy">♔</span>Beat 3 grandpas at chess<br>and lost to a 9-year-old!</div></div></div>
     </div>
 
+    <!-- SKILLS -->
     <div class="topic-title">Skills</div>
     <div class="card-list" id="skills-list">
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Java & HTML (Relearning)</div>
-          <div class="card-back">
-            <span class="trophy">💻</span>
-            Wrote "Hello World" in 5 languages<br>Still debugging in all!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Coaching & Mentoring</div>
-          <div class="card-back">
-            <span class="trophy">🎓</span>
-            Helped 30+ students<br>Become champions!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Professional Cooking</div>
-          <div class="card-back">
-            <span class="trophy">🍲</span>
-            Cooked for 200+ guests<br>Only burned 1 dish!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Team Leadership</div>
-          <div class="card-back">
-            <span class="trophy">🤝</span>
-            Led 5 teams<br>All survived group projects!
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front">Sports Strategy</div>
-          <div class="card-back">
-            <span class="trophy">📋</span>
-            Mastered 12 sports playbooks<br>Forgot most after the game!
-          </div>
-        </div>
-      </div>
+      <div class="card"><div class="card-inner"><div class="card-front">Java & HTML (Relearning)</div><div class="card-back"><span class="trophy">💻</span>Wrote "Hello World" in 5 languages<br>Still debugging in all!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">Coaching & Mentoring</div><div class="card-back"><span class="trophy">🎓</span>Helped 30+ students<br>Become champions!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">Professional Cooking</div><div class="card-back"><span class="trophy">🍲</span>Cooked for 200+ guests<br>Only burned 1 dish!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">Team Leadership</div><div class="card-back"><span class="trophy">🤝</span>Led 5 teams<br>All survived group projects!</div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">Sports Strategy</div><div class="card-back"><span class="trophy">📋</span>Mastered 12 sports playbooks<br>Forgot most after the game!</div></div></div>
     </div>
 
+    <!-- GAME DEVELOPMENT -->
+    <div class="topic-title">Game Development</div>
+    <div class="card-list" id="game-dev-list">
+      <div class="card"><div class="card-inner"><div class="card-front">🎮 Echo Maze — Neon Escape (Updated)</div><div class="card-back"><span class="trophy">🕹️</span>Click to play the latest version!<br><a href="https://callmenawang.github.io/nawang.github.io/game(improv.).html" target="_blank" style="color:#ffc107; text-decoration: underline; margin-top: 6px; display: inline-block;">Play Updated Version</a></div></div></div>
+      <div class="card"><div class="card-inner"><div class="card-front">🎮 Echo Maze — Neon Escape (Older)</div><div class="card-back"><span class="trophy">🕹️</span>The classic version you might recognize.<br><a href="https://callmenawang.github.io/nawang.github.io/game.html" target="_blank" style="color:#ffc107; text-decoration: underline; margin-top: 6px; display: inline-block;">Play Older Version</a></div></div></div>
+    </div>
+
+    <!-- CONTACT -->
     <div class="topic-title">Contact Me</div>
     <div class="contact-list">
-      <a href="mailto:nawangdundup@gmail.com">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/gmail.svg" alt="Email"> Email
-      </a>
-      <a href="https://github.com/CallMeNawang" target="_blank">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg" alt="GitHub"> GitHub
-      </a>
-      <a href="https://www.chess.com/member/iChallengeYou1on1" target="_blank">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/chessdotcom.svg" alt="Chess.com"> Chess.com
-      </a>
+      <a href="mailto:ngwang@example.com">📧 Email</a>
+      <a href="https://github.com/callmenawang" target="_blank">💻 GitHub</a>
+      <a href="https://www.linkedin.com/in/ngwangdhindu" target="_blank">🔗 LinkedIn</a>
     </div>
-    <span class="challenge-note">Think you can beat me? Challenge me on Chess.com!</span>
 
+    <!-- FUN FACT -->
     <div class="funfact">
-      <span>Fun fact: My cooking is so good, even my smoke alarm wants seconds!</span>
-      <span>🔥😂</span>
+      Fun Fact: I once cooked for 200 people while hiking up a mountain! <span>🥘</span>
     </div>
   </div>
 
   <footer>
-    &copy; 2025 Ngwang Dhindu Hyolmo &nbsp;|&nbsp; Nepal &rarr; Busan &nbsp;|&nbsp; Crafted with passion
+    &copy; 2025 Ngwang Dhindu Hyolmo. All rights reserved.
   </footer>
 
   <script>
-    // Animated chess rating, now always starts at 1900 ELO and shows it's your current ranking
-    let rating = 1900, goal = 2200, delay = 70;
-    function animateRating() {
-      const ratingSpan = document.getElementById("chessRating");
-      let current = rating;
-      ratingSpan.textContent = current; // Show current immediately
-      const interval = setInterval(() => {
-        if (current < goal) {
-          current++;
-          ratingSpan.textContent = current;
-        } else {
-          clearInterval(interval);
-        }
-      }, delay);
-    }
-    setTimeout(animateRating, 1200);
-
-    // Card Flip Logic for skills and interests
-    document.querySelectorAll("#interests-list .card, #skills-list .card").forEach(card => {
-      card.addEventListener("click", function() {
-        card.classList.toggle("flipped");
-      });
-      card.addEventListener("keypress", function(event) {
-        if (event.key === "Enter" || event.key === " ") {
-          card.classList.toggle("flipped");
-        }
-      });
-      card.setAttribute("tabindex", "0");
-      card.setAttribute("role", "button");
-      card.setAttribute("aria-label", "Show Achievement");
+    // Flip cards on click
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => { card.classList.toggle('flipped'); });
     });
   </script>
 </body>
